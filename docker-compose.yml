@@ -1,0 +1,19 @@
+version: '3.4'
+
+services:
+  devenv-eval-backend:
+    image: devenv-eval-backend
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8080
+    networks:
+      - dev
+  redis:
+    image: redis:7-alpine
+    networks:
+      - dev
+networks:
+  dev:
+    name: devenv-eval-backend-dev

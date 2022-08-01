@@ -1,0 +1,11 @@
+version: '3.4'
+
+services:
+  devenv-eval-backend:
+    image: devenv-eval-backend-devcontainer
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    volumes:
+      - .:/workspace:cached
