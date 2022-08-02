@@ -31,3 +31,10 @@ def get_by_key(key: str):
 def set_by_key(key: str):
     r.set(key, request.form["data"])
     return ("", 204)
+
+
+@app.post("/")
+def set_by_key_and_value():
+    for key, value in request.form:
+        r.set(key, value)
+    return ("", 204)
