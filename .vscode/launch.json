@@ -1,6 +1,24 @@
 {
     "configurations": [
         {
+            "name": "Python: Flask",
+            "type": "python",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "app.py",
+                "FLASK_DEBUG": "1",
+                "REDIS_HOST": "devenv-eval-backend-redis-1"
+            },
+            "args": [
+                "run",
+                "--no-debugger",
+                "--no-reload"
+            ],
+            "jinja": true,
+            "justMyCode": true
+        },
+        {
             "name": "Docker: Python - Flask",
             "type": "docker",
             "request": "launch",

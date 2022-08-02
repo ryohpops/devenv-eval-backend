@@ -6,6 +6,9 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    environment:
+      - FLASK_APP=app.py
+      - REDIS_HOST=redis
     ports:
       - 8080:8080
     networks:

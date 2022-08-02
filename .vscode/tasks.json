@@ -20,8 +20,11 @@
 			],
 			"dockerRun": {
 				"env": {
-					"FLASK_APP": "app.py"
-				}
+					"FLASK_APP": "app.py",
+					"FLASK_DEBUG": "1",
+					"REDIS_HOST": "devenv-eval-backend-redis-1"
+				},
+				"network": "devenv-eval-backend-dev"
 			},
 			"python": {
 				"args": [
