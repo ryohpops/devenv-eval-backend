@@ -1,40 +1,57 @@
+import logging
 import os
 
-from flask import Flask, abort, request
+import strawberry
+from fastapi import FastAPI
 from redis import Redis
+from strawberry.fastapi import GraphQLRouter
+
+logger = logging.getLogger("uvicorn")
 
 redis_host = os.environ.get("REDIS_HOST", "localhost")
 redis_port = os.environ.get("REDIS_PORT", "6379")
 
-app = Flask(__name__)
-r = Redis(host=redis_host, port=int(redis_port))
+redis_client = Redis(
+    host=redis_host, port=int(redis_port), decode_responses=True)
 
-app.logger.info(f"REDIS_HOST = {redis_host}")
-app.logger.info(f"REDIS_PORT = {redis_port}")
-
-
-@app.get("/")
-def hello_world():
-    return "<p>Hello World!</p>"
+logger.info(f"REDIS_HOST = {redis_host}")
+logger.info(f"REDIS_PORT = {redis_port}")
 
 
-@app.get("/<key>")
-def get_by_key(key: str):
-    value = r.get(key)
-    if value:
-        return value
-    else:
-        abort(404)
+@strawberry.type
+class KeyValue:
+    key: str
+    value: str
 
 
-@app.put("/<key>")
-def set_by_key(key: str):
-    r.set(key, request.form["data"])
-    return ("", 204)
+@strawberry.type
+class KeyNotFoundError:
+    key: str
 
 
-@app.post("/")
-def set_by_key_and_value():
-    for key, value in request.form:
-        r.set(key, value)
-    return ("", 204)
+Response = strawberry.union("QueryResponse", (KeyValue, KeyNotFoundError))
+
+
+@strawberry.type
+class Query:
+    @strawberry.field
+    def get_by_key(key: str) -> Response:
+        value = redis_client.get(key)
+        if value:
+            return KeyValue(key=key, value=value)
+        else:
+            return KeyNotFoundError(key=key)
+
+
+@strawberry.type
+class Mutation:
+    @strawberry.mutation
+    def set_by_key(self, key: str, value: str) -> KeyValue:
+        redis_client.set(key, value)
+        return KeyValue(key=key, value=value)
+
+
+schema = strawberry.Schema(Query, Mutation)
+graphql_app = GraphQLRouter(schema)
+app = FastAPI()
+app.include_router(graphql_app, prefix="/graphql")
